@@ -1,13 +1,14 @@
 """This module is test."""
 
+import json
+import logging
+import os
+import urllib
+import urllib.request
+from base64 import b64decode
+
 import boto3
 from botocore.exceptions import ClientError
-import urllib
-import logging
-import json
-import urllib.request
-import os
-from base64 import b64decode
 
 ENCRYPTED_WEBHOOK = os.environ["WEBHOOK_TOKEN"]
 ENCRYPTED_TTOKEN = os.environ["T_TOKEN"]
@@ -53,7 +54,6 @@ class Command:
 
     def __init__(self, text):
         """__init__ is initialise this class."""
-
         textList = text.split(" ")
         self.command = textList[0]
         if len(textList) > 1:
@@ -63,12 +63,10 @@ class Command:
 
     def ok_command(self):
         """Set command list."""
-
         return self.command in commandList
 
     def help_command(self):
         """Set help command."""
-
         postSlack(
             "This command gives\n"
             "\thelp : show command list\n"
@@ -79,7 +77,6 @@ class Command:
 
     def stop_command(self, ec2):
         """Stop command."""
-
         if self.param == "":
             return "put instance id. ex stop i-xxxxxxxxx."
         try:
@@ -96,7 +93,6 @@ class Command:
 
     def start_command(self, ec2):
         """Start command."""
-
         if self.param == "":
             return "put instance id. ex start i-xxxxxxxxx."
         try:
@@ -113,7 +109,6 @@ class Command:
 
     def list_command(self, instances):
         """List command."""
-
         instanceList = []
         for reservation in instances["Reservations"]:
             for instance in reservation["Instances"]:
@@ -135,7 +130,6 @@ class Command:
 
 def postSlack(text):
     """Post to slack."""
-
     request = urllib.request.Request(
         WEBHOOK_URL,
         json.dumps({"text": text}).encode(),
@@ -148,7 +142,6 @@ def postSlack(text):
 
 def deletePrePost(channel, process, startUnixTime):
     """Delete before post message."""
-
     logger.info("process id: " + process)
     params = {
         "channel": channel,
@@ -180,7 +173,6 @@ def deletePrePost(channel, process, startUnixTime):
 
 def lambda_handler(event, context):
     """Lambda handler."""
-
     command_text = event["text"]
     channelId = event["channel_id"]
     processId = event["process_id"]
