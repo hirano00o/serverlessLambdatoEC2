@@ -29,6 +29,7 @@ commandList = [
     'list'
 ]
 
+
 class Command:
     def __init__(self, text):
         textList = text.split(' ')
@@ -42,12 +43,12 @@ class Command:
         return self.command in commandList
 
     def help_command(self):
-        postSlack("This command gives\n"\
-            "\thelp : show command list\n" \
-            "\tlist : show ec2 instances\n" \
-            "\tstop : stop selected ec2 instance\n" \
-            "\tstart : start selected ec2 instance" \
-        )
+        postSlack("This command gives\n"
+                  "\thelp : show command list\n"
+                  "\tlist : show ec2 instances\n"
+                  "\tstop : stop selected ec2 instance\n"
+                  "\tstart : start selected ec2 instance"
+                  )
 
     def stop_command(self, ec2):
         if self.param == '':
@@ -79,11 +80,12 @@ class Command:
                     instance['Tags'][0]['Value'] + " is " + instance['State']['Name'] + ". " + instance['InstanceId'] + "\n"
                 )
         instanceList.sort()
-        filtered = [ str for str in instanceList if self.param in str ]
+        filtered = [str for str in instanceList if self.param in str]
         list = ""
         for instance in filtered:
             list += instance
         return postSlack(list)
+
 
 def postSlack(text):
     request = urllib.request.Request(
@@ -98,6 +100,7 @@ def postSlack(text):
     with urllib.request.urlopen(request) as response:
         returnData = response.read()
         logger.info(returnData)
+
 
 def deletePrePost(channel, process, startUnixTime):
     logger.info("process id: " + process)
@@ -128,6 +131,7 @@ def deletePrePost(channel, process, startUnixTime):
                 returnData = response.read()
                 logger.info(returnData)
 
+
 def lambda_handler(event, context):
     command_text = event["text"]
     channelId = event["channel_id"]
@@ -151,5 +155,5 @@ def lambda_handler(event, context):
     deletePrePost(channelId, processId, startUnixTime)
 
     return {
-        "statusCode" : 200
+        "statusCode": 200
     }

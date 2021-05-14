@@ -1,0 +1,25 @@
+name: Recommended Python style check
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - '**'
+
+jobs:
+  recommended-python-style-check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.7'
+    - name: Install dependencies
+      run: pip install -r requirements-ci.txt
+    - name: Check by pydocstyle
+      run: pydocstyle ./
+    - name: Check by mypy
+      run: mypy --config-file ./mypy.ini ./
+
