@@ -6,6 +6,7 @@ import os
 import urllib
 import urllib.request
 from base64 import b64decode
+from typing import Any, Dict, List
 
 import boto3
 from botocore.exceptions import ClientError
@@ -52,7 +53,7 @@ commandList = ["help", "stop", "start", "list"]
 class Command:
     """Command is command class."""
 
-    def __init__(self, text):
+    def __init__(self, text: str) -> None:
         """__init__ is initialise this class."""
         textList = text.split(" ")
         self.command = textList[0]
@@ -61,11 +62,11 @@ class Command:
         else:
             self.param = ""
 
-    def ok_command(self):
+    def ok_command(self) -> Any:
         """Set command list."""
         return self.command in commandList
 
-    def help_command(self):
+    def help_command(self) -> None:
         """Set help command."""
         postSlack(
             "This command gives\n"
@@ -75,7 +76,7 @@ class Command:
             "\tstart : start selected ec2 instance"
         )
 
-    def stop_command(self, ec2):
+    def stop_command(self, ec2: Any) -> Any:
         """Stop command."""
         if self.param == "":
             return "put instance id. ex stop i-xxxxxxxxx."
@@ -91,7 +92,7 @@ class Command:
                 + str(status["ResponseMetadata"]["HTTPStatusCode"])
             )
 
-    def start_command(self, ec2):
+    def start_command(self, ec2: Any) -> Any:
         """Start command."""
         if self.param == "":
             return "put instance id. ex start i-xxxxxxxxx."
@@ -107,7 +108,7 @@ class Command:
                 + str(status["ResponseMetadata"]["HTTPStatusCode"])
             )
 
-    def list_command(self, instances):
+    def list_command(self, instances: Any) -> Any:
         """List command."""
         instanceList = []
         for reservation in instances["Reservations"]:
@@ -128,7 +129,7 @@ class Command:
         return postSlack(list)
 
 
-def postSlack(text):
+def postSlack(text: str) -> None:
     """Post to slack."""
     request = urllib.request.Request(
         WEBHOOK_URL,
@@ -140,7 +141,7 @@ def postSlack(text):
         logger.info(returnData)
 
 
-def deletePrePost(channel, process, startUnixTime):
+def deletePrePost(channel: str, process: str, startUnixTime: str) -> None:
     """Delete before post message."""
     logger.info("process id: " + process)
     params = {
@@ -149,29 +150,30 @@ def deletePrePost(channel, process, startUnixTime):
         "oldest": startUnixTime,
     }
 
-    request = urllib.request.Request(HISTRY_URL)
-    historyParams = urllib.parse.urlencode(params).encode("ascii")
-    request.data = historyParams
-    with urllib.request.urlopen(request) as response:
-        returnData = response.read()
-        logger.info(returnData)
-    data = json.loads(returnData)
-    for message in data["messages"]:
-        if process in message["text"]:
-            params = {
-                "channel": channel,
-                "token": DECRYPTED_LEGACY_TOKEN,
-                "ts": message["ts"],
-            }
-            request = urllib.request.Request(DELETE_URL)
-            deleteParams = urllib.parse.urlencode(params).encode("ascii")
-            request.data = deleteParams
-            with urllib.request.urlopen(request) as response:
-                returnData = response.read()
-                logger.info(returnData)
+    # request = urllib.request.Request(HISTRY_URL)
+    # historyParams = urllib.parse.urlencode(params).encode("ascii")
+    # request.data = historyParams
+    # with urllib.request.urlopen(request) as response:
+    #     returnData = response.read()
+    #     logger.info(returnData)
+    # data = json.loads(returnData)
+    # for message in data["messages"]:
+    #     if process in message["text"]:
+    #         params = {
+    #             "channel": channel,
+    #             "token": DECRYPTED_LEGACY_TOKEN,
+    #             "ts": message["ts"],
+    #         }
+    #         request = urllib.request.Request(DELETE_URL)
+    #         deleteParams = urllib.parse.urlencode(params).encode("ascii")
+    #         deleteParams = params
+    #         request.data = deleteParams
+    #         with urllib.request.urlopen(request) as response:
+    #             returnData = response.read()
+    #             logger.info(returnData)
 
 
-def lambda_handler(event, context):
+def lambda_handler(event: Dict, context: Any) -> Dict:
     """Lambda handler."""
     command_text = event["text"]
     channelId = event["channel_id"]
@@ -179,7 +181,7 @@ def lambda_handler(event, context):
     startUnixTime = event["start_unix_time"]
 
     commandProcess = Command(command_text)
-    if commandProcess.ok_command() == False:
+    if not commandProcess.ok_command():
         commandProcess.help_command()
     else:
         ec2 = boto3.client("ec2")
