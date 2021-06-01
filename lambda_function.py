@@ -1,11 +1,12 @@
+import json
+import logging
+import os
+import urllib
+import urllib.request
+from base64 import b64decode
+
 import boto3
 from botocore.exceptions import ClientError
-import urllib
-import logging
-import json
-import urllib.request
-import os
-from base64 import b64decode
 
 ENCRYPTED_WEBHOOK = os.environ["WEBHOOK_TOKEN"]
 ENCRYPTED_TTOKEN = os.environ["T_TOKEN"]
